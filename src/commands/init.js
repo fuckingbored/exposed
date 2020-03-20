@@ -1,5 +1,7 @@
 const { Command, flags } = require('@oclif/command')
 const { prompt } = require('enquirer');
+const low = require('lowdb');
+const FileAsync = require('lowdb/adapters/FileAsync');
 
 class InitCommand extends Command {
     async run() {
@@ -20,6 +22,13 @@ class InitCommand extends Command {
             }
         ]);
         console.log(response);
+
+        let db = await low(new FileAsync("xps.json"));
+        await db.defaults({
+                name: response.name,
+                description: response.description,
+                modules: {}
+        }).write();
     }
 }
 
