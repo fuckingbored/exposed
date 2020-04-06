@@ -46,13 +46,13 @@ async function listDependencies(entry) {
         try {
             let p = children.pop(0)
             if (p.type === 'xps') {
-                listDepends.push(p)
                 cPath = p.dependency.match(/(.*\/)|(.*\\)/g)[0]
                 let depends = await directDependencies(p.dependency).then(val => val.filter(d => {
                     return !dependencies.includes(path.join(cPath, d.dependency))
                 }))
                 dependencies = dependencies.concat(depends.map(d => (path.join(cPath, d.dependency))))
                 children = children.concat(depends.map(d => ({type: d.type, dependency: (d.type == 'xps') ? path.join(cPath, d.dependency) : d.dependency})))
+                listDepends = listDepends.concat(depends.map(d => ({type: d.type, dependency: (d.type == 'xps') ? path.join(cPath, d.dependency) : d.dependency})))
             }
         } catch (err) {
             console.error(err)
