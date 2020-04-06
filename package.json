@@ -1,5 +1,5 @@
 {
-  "name": "exposed",
+  "name": "exposed-cli",
   "description": "Some package manager",
   "version": "0.0.0",
   "author": "Christian Wang @Squishy123",
@@ -47,7 +47,7 @@
   "repository": "fuckingbored/exposed",
   "scripts": {
     "postpack": "rimraf oclif.manifest.json",
-    "posttest": "eslint .",
+    "posttest": "eslint . --fix",
     "prepack": "oclif-dev manifest && oclif-dev readme",
     "test": "echo NO TESTS",
     "version": "oclif-dev readme && git add README.md"

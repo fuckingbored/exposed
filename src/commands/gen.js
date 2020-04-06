@@ -13,18 +13,19 @@ class GenCommand extends Command {
                 {
                     type: 'input',
                     name: 'filename',
-                    message: 'What is the module name?',
+                    message: 'Path to entry file',
+                    default: 'index.js',
                 },
             ])
             filename = response.filename
         }
 
         let data = await fs.listDependencies(path.resolve(process.cwd(), filename))
-        console.log(data)
+        this.log(data)
     }
 }
 
-GenCommand.description = `xps gen => Creates a new xps module
+GenCommand.description = `xps gen => Generate a list of module dependencies
 Setup everything needed to track changes, dependencies for a xps module
 `
 
