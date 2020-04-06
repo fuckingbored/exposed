@@ -1,11 +1,11 @@
-const { Command, flags } = require('@oclif/command')
-const { prompt } = require('enquirer');
-const low = require('lowdb');
-const FileAsync = require('lowdb/adapters/FileAsync');
+const {Command, flags} = require('@oclif/command')
+const {prompt} = require('enquirer')
+const low = require('lowdb')
+const FileAsync = require('lowdb/adapters/FileAsync')
 
 class InitCommand extends Command {
     async run() {
-        const { flags } = this.parse(InitCommand)
+        const {flags} = this.parse(InitCommand)
         const name = flags.name || 'world'
         this.log(`hello ${name} from .\\src\\commands\\hello.js`)
 
@@ -13,22 +13,22 @@ class InitCommand extends Command {
             {
                 type: 'input',
                 name: 'name',
-                message: 'What is the module name?'
+                message: 'What is the module name?',
             },
             {
                 type: 'input',
                 name: 'description',
-                message: 'What is the module description?'
-            }
-        ]);
-        console.log(response);
+                message: 'What is the module description?',
+            },
+        ])
 
-        let db = await low(new FileAsync("xps.json"));
+        let db = await low(new FileAsync('xps.json'))
         await db.defaults({
-                name: response.name,
-                description: response.description,
-                modules: {}
-        }).write();
+            name: response.name,
+            description: response.description,
+            version: '0.0.1',
+            modules: {},
+        }).write()
     }
 }
 
@@ -37,7 +37,7 @@ Setup everything needed to track changes, dependencies for a xps module
 `
 
 InitCommand.flags = {
-    name: flags.string({ char: 'n', description: 'name to print' }),
+    name: flags.string({char: 'n', description: 'name to print'}),
 }
 
 module.exports = InitCommand
