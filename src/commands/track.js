@@ -5,7 +5,8 @@ const FileAsync = require('lowdb/adapters/FileAsync')
 const path = require('path')
 const fs = require('../helpers/fs')
 const BypassError = require('../helpers/err').BypassError
-const {projectExists, trackerExists} = require('../middleware/validation')
+const {projectExists} = require('../middleware/project')
+const {trackerExists} = require('../middleware/tracker')
 
 class TrackCommand extends Command {
     async run() {
