@@ -35,7 +35,6 @@ async function lookup(path, level = 10) {
     let pathExists = await fs.pathExists(currentPath)
     let currentLevel = 0
     do {
-        console.log(currentPath)
         pathExists = await fs.pathExists(currentPath)
         if (pathExists)
             return currentPath

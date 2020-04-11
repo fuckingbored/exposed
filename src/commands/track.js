@@ -4,9 +4,7 @@ const low = require('lowdb')
 const FileAsync = require('lowdb/adapters/FileAsync')
 const path = require('path')
 const fs = require('../helpers/fs')
-
-class BypassError extends Error {
-}
+const BypassError = require('../helpers/err').BypassError
 
 class TrackCommand extends Command {
     async run() {
@@ -61,7 +59,6 @@ class TrackCommand extends Command {
 
             // append to projectDB
             let projectDB = await low(new FileAsync(projExists))
-
             await projectDB.set(`modules.${response.name}`, trackingDB.getState()).write()
 
             this.log('Successfully init new XPS module')
