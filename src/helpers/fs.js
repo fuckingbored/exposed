@@ -3,6 +3,7 @@
  */
 const fs = require('fs-extra')
 const path = require('path')
+const object = require('../middleware/object')
 
 // async wrapper for file existence
 // @DEPRECATED
@@ -18,6 +19,7 @@ async function fileExists(path) {
 }
 
 // async wrapper for readfile
+// @DEPRECATED
 async function readFile(path, encoding = 'utf8') {
     return new Promise((res, rej) => {
         fs.readFile(path, encoding, (err, data) => {
@@ -45,8 +47,20 @@ async function lookup(path, level = 10) {
 }
 
 // returns a list of direct dependencies of a given entry file
-async function directDependencies(entry) {
-    let file = await readFile(entry)
+async function directDependencies(entry, opts) {
+    let file
+    let hash
+
+    // write to file and hash
+    if (opts.write) {
+        let objHash = await object.createHashedFile(entry, opts.write)
+        file = objHash.content
+        hash = objHash.hash
+    } else {
+        file = await fs.readFile(entry)
+        hash = object.hashContent(file)
+    }
+
     let dependencies = file.match(/(require\(.*\))/g)
     if (dependencies) {
         dependencies = dependencies.map(d => {
@@ -57,18 +71,18 @@ async function directDependencies(entry) {
                 if (!match.includes('.js'))
                     match += '.js'
 
-                return {type: 'xps', dependency: match}
+                return {type: 'xps', dependency: match, content: file, hash: hash}
             }
             let match = d.match(/('.*')|(".*")|(`.*`)/g)[0]
             match = match.substring(1, match.length - 1)
-            return {type: 'npm', dependency: match}
+            return {type: 'npm', dependency: match, content: file, hash: hash}
         })
     }
     return dependencies
 }
 
 // returns a list of all the dependencies of a given entry and it's children
-async function listDependencies(entry) {
+async function listDependencies(entry, opts) {
     let children = [{type: 'xps', dependency: entry}]
     let listDepends = []
     let dependencies = []
@@ -79,28 +93,25 @@ async function listDependencies(entry) {
             let exists = await fs.pathExists(p.dependency)
             if (exists) {
                 cPath = p.dependency.match(/(.*\/)|(.*\\)/g)[0]
-                let depends = await directDependencies(p.dependency)
+                let depends = await directDependencies(p.dependency, opts)
                 if (depends) {
                     depends = depends.filter(d => {
                         return !dependencies.includes((d.type == 'xps') ? path.join(cPath, d.dependency) : d.dependency)
                     })
                     dependencies = dependencies.concat(depends.map(d => ((d.type == 'xps') ? path.join(cPath, d.dependency) : d.dependency)))
                     children = children.concat(depends.map(d => ({type: d.type, dependency: (d.type == 'xps') ? path.join(cPath, d.dependency) : d.dependency})))
-                    listDepends = listDepends.concat(depends.map(d => ({type: d.type, dependency: (d.type == 'xps') ? path.join(cPath, d.dependency) : d.dependency})))
+                    listDepends = listDepends.concat(depends.map(d => ({type: d.type, dependency: (d.type == 'xps') ? path.join(cPath, d.dependency) : d.dependency, ...d})))
                 }
             }
         } catch (error) {
-            this.error(error)
+            console.error(error)
         }
     }
     return listDepends
 }
 
 module.exports = {
-    fileExists: fileExists,
-    readFile: readFile,
     lookup: lookup,
     listDependencies: listDependencies,
     directDependencies: directDependencies,
-    ...fs,
 }

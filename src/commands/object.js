@@ -5,6 +5,7 @@ const FileAsync = require('lowdb/adapters/FileAsync')
 const path = require('path')
 const fs = require('../helpers/fs')
 const crypto = require('crypto')
+const object = require('../middleware/object')
 
 class ObjectCommand extends Command {
     async run() {
@@ -23,9 +24,16 @@ class ObjectCommand extends Command {
                 throw new Error('File does not exist')
             }
 
-            // get the hash
-            let fileContents = await fs.readFile(filename)
-            this.log(crypto.createHash('sha256').update(fileContents).digest('hex'))
+            // write to database
+            if (flags.write) {
+                // check if xps project exists
+                let projExists = await projectExists()
+                let projectDB = await low(new FileAsync(path.resolve(projExists, 'modules.json')))
+            } else {
+                // get the hash
+                let fileContents = await fs.readFile(filename)
+                this.log(object.hashContent(fileContents))
+            }
         } catch (error) {
             this.error(error)
         }
@@ -38,6 +46,7 @@ Show file contents and information
 
 ObjectCommand.flags = {
     filename: flags.string({char: 'f', description: 'filename of object'}),
+    write: flags.string({char: 'w', description: 'write to database'}),
 }
 
 module.exports = ObjectCommand
