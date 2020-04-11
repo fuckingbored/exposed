@@ -29,7 +29,7 @@ USAGE
 <!-- commands -->
 * [`xps gen`](#xps-gen)
 * [`xps help [COMMAND]`](#xps-help-command)
-* [`xps init`](#xps-init)
+* [`xps track`](#xps-track)
 
 ## `xps gen`
 
@@ -65,17 +65,17 @@ OPTIONS
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v2.2.3/src\commands\help.ts)_
 
-## `xps init`
+## `xps track`
 
-xps init => Creates a new xps module
+xps track => Creates a new xps module
 
 ```
 USAGE
-  $ xps init
+  $ xps track
 
 DESCRIPTION
   Setup everything needed to track changes, dependencies for a xps module
 ```
 
-_See code: [src\commands\init.js](https://github.com/fuckingbored/exposed/blob/v0.0.0/src\commands\init.js)_
+_See code: [src\commands\track.js](https://github.com/fuckingbored/exposed/blob/v0.0.0/src\commands\track.js)_
 <!-- commandsstop -->

@@ -5,58 +5,30 @@ const FileAsync = require('lowdb/adapters/FileAsync')
 const path = require('path')
 const fs = require('../helpers/fs')
 
+const initStruct = require('../dirstructs/init/struct')
+
 class InitCommand extends Command {
     async run() {
         try {
-            let initExists = await fs.fileExists(path.resolve(process.cwd(), 'xps.json'))
-            if (initExists) {
-                throw new Error('An XPS module already exists here')
+            // check if dir exists
+            let remotesExist = await Promise.all([fs.pathExists(path.resolve(process.cwd(), '.xps/remotes.json')), fs.pathExists(path.resolve(process.cwd(), '.xps/modules.json'))])
+            if (remotesExist[0] && remotesExist[1]) {
+                throw new Error('An XPS project already exists here')
             }
 
-            const response = await prompt([
-                {
-                    type: 'input',
-                    name: 'name',
-                    message: 'What is the module name?',
-                },
-                {
-                    type: 'input',
-                    name: 'description',
-                    message: 'What is the module description?',
-                },
-                {
-                    type: 'input',
-                    name: 'entry',
-                    message: 'Entry file?',
-                    default: 'index.js',
-                },
-            ])
+            // copy tracking files over
+            await fs.copy(initStruct.modules, path.resolve(process.cwd(), '.xps/modules.json'))
+            await fs.copy(initStruct.remotes, path.resolve(process.cwd(), '.xps/remotes.json'))
 
-            let db = await low(new FileAsync('xps.json'))
-            await db.defaults({
-                name: response.name,
-                description: response.description,
-                entry: response.entry,
-                version: '0.0.1',
-                dependencies: [],
-            }).write()
-
-            let entryExists = fs.fileExists(path.resolve(process.cwd(), response.entry))
-
-            if (entryExists) {
-                let dependencies = await fs.listDependencies(path.resolve(process.cwd(), response.entry))
-                await db.set('dependencies', dependencies).write()
-            }
-
-            this.log('Successfully init new XPS module')
+            this.log('New XPS Project Created!')
         } catch (error) {
-            this.log('Failed to init XPS module')
+            this.log('Failed to create XPS Project:')
             this.error(error)
         }
     }
 }
 
-InitCommand.description = `xps init => Creates a new xps module
-Setup everything needed to track changes, dependencies for a xps module
+InitCommand.description = `xps init => Creates a new xps project
+Setup everything needed to track changes, dependencies for xps modules
 `
 module.exports = InitCommand

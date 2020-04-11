@@ -1,10 +1,11 @@
 /**
  * Bunch of helper functions for filesystem-related tasks
  */
-const fs = require('fs')
+const fs = require('fs-extra')
 const path = require('path')
 
 // async wrapper for file existence
+// @DEPRECATED
 async function fileExists(path) {
     return new Promise((res, rej) => {
         fs.access(path, fs.F_OK, err => {
@@ -60,7 +61,7 @@ async function listDependencies(entry) {
     while (children.length > 0) {
         try {
             let p = children.pop(0)
-            let exists = await fileExists(p.dependency)
+            let exists = await fs.pathExists(p.dependency)
             if (exists) {
                 cPath = p.dependency.match(/(.*\/)|(.*\\)/g)[0]
                 let depends = await directDependencies(p.dependency)
@@ -85,4 +86,5 @@ module.exports = {
     readFile: readFile,
     listDependencies: listDependencies,
     directDependencies: directDependencies,
+    ...fs,
 }
