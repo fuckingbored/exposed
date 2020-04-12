@@ -48,22 +48,12 @@ async function lookup(path, level = 10) {
 
 // returns a list of direct dependencies of a given entry file
 async function directDependencies(entry, opts) {
-    let file
-    let hash
-
-    // write to file and hash
-    if (opts.write) {
-        let objHash = await object.createHashedFile(entry, opts.write)
-        file = objHash.content
-        hash = objHash.hash
-    } else {
-        file = await fs.readFile(entry)
-        hash = object.hashContent(file)
-    }
+    let file = await (await fs.readFile(entry)).toString()
+    console.log(file)
 
     let dependencies = file.match(/(require\(.*\))/g)
     if (dependencies) {
-        dependencies = dependencies.map(d => {
+        dependencies = await Promise.all(dependencies.map(async d => {
             if (d.match(/('[.\\\/]+.*')|("[.\\\/]+.*")|(`[.\\\/]+.*`)/g)) {
                 let match = d.match(/('.*')|(".*")|(`.*`)/g)[0]
                 match = match.substring(1, match.length - 1)
@@ -71,12 +61,16 @@ async function directDependencies(entry, opts) {
                 if (!match.includes('.js'))
                     match += '.js'
 
-                return {type: 'xps', dependency: match, content: file, hash: hash}
+                // let hash = await
+                // console.log(match)
+                // console.log(hash)
+
+                return {type: 'xps', dependency: match, hash: await object.createHashedFile(match, opts.write)}
             }
             let match = d.match(/('.*')|(".*")|(`.*`)/g)[0]
             match = match.substring(1, match.length - 1)
-            return {type: 'npm', dependency: match, content: file, hash: hash}
-        })
+            return {type: 'npm', dependency: match}
+        }))
     }
     return dependencies
 }
@@ -107,6 +101,7 @@ async function listDependencies(entry, opts) {
             console.error(error)
         }
     }
+    console.log(listDepends)
     return listDepends
 }
 

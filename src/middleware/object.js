@@ -23,7 +23,7 @@ async function createHashedFile(filepath, outputdir) {
 
     await pipeline(fs.createReadStream(filepath), zlib.createGzip(), fs.createWriteStream(`${outputdir}/${hash}.gz`))
 
-    return {hash: hash, content: String(content)}
+    return hash
 }
 
 async function readGzip(filepath) {

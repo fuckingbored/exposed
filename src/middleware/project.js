@@ -1,5 +1,6 @@
 
-const fs = require('../helpers/fs')
+const hfs = require('../helpers/fs')
+const fs = require('fs-extra')
 const path = require('path')
 
 const BypassError = require('../helpers/err').BypassError
@@ -8,7 +9,7 @@ const initStruct = require('../properties/dirStructs/init/init')
 // check if an xps project exists, if it does return it's path, if not null
 async function projectExists(startDir = process.cwd()) {
     // search for the directory
-    let projExists = await fs.lookup(path.resolve(startDir, '.xps/'))
+    let projExists = await hfs.lookup(path.resolve(startDir, '.xps/'))
     if (!projExists) {
         return
     }
