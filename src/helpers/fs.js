@@ -32,16 +32,16 @@ async function readFile(path, encoding = 'utf8') {
 }
 
 // looks for a path in the current and parent directories up to a given level
-async function lookup(path, level = 10) {
-    let currentPath = path
+async function lookup(objpath, startDir = process.cwd(), level = 10) {
+    let currentPath = startDir
     let pathExists = await fs.pathExists(currentPath)
     let currentLevel = 0
     do {
-        pathExists = await fs.pathExists(currentPath)
+        pathExists = await fs.pathExists(path.resolve(currentPath, objpath))
         if (pathExists)
-            return currentPath
+            return path.resolve(currentPath, objpath)
 
-        currentPath = '../' + currentPath
+        currentPath = path.resolve(currentPath, '../')
         currentLevel++
     } while (!pathExists && (currentLevel < level || !level))
 }
@@ -49,8 +49,6 @@ async function lookup(path, level = 10) {
 // returns a list of direct dependencies of a given entry file
 async function directDependencies(entry, opts) {
     let file = await (await fs.readFile(entry)).toString()
-    console.log(file)
-
     let dependencies = file.match(/(require\(.*\))/g)
     if (dependencies) {
         dependencies = await Promise.all(dependencies.map(async d => {

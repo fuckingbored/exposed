@@ -8,12 +8,16 @@ const fs = require('fs-extra')
 const BypassError = require('../helpers/err').BypassError
 const {projectExists} = require('../middleware/project')
 const {trackerExists} = require('../middleware/tracker')
+const object = require('../middleware/object')
 
 class TrackCommand extends Command {
     async run() {
         try {
             // check if xps project exists
             let projExists = await projectExists()
+            if (!projExists) {
+                throw new Error('fatal: not an xps repository (or any of the parent directories): .xps')
+            }
 
             // check if xps module tracker exists
             await trackerExists()
@@ -50,12 +54,15 @@ class TrackCommand extends Command {
             // creating entry file
             let entryExists = fs.pathExists(path.resolve(process.cwd(), response.entry))
             if (entryExists) {
+                // generate hash
+                let hash = await object.createHashedFile(path.resolve(process.cwd(), response.entry), projExists + '/objects')
+
                 // generate list of dependencies
                 let dependencies = await hfs.listDependencies(path.resolve(process.cwd(), response.entry), {
                     write: projExists + '/objects',
                 })
 
-                await trackingDB.set('dependencies', dependencies).write()
+                await trackingDB.set('hash', hash).set('dependencies', dependencies).write()
             }
 
             // append to projectDB

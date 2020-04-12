@@ -9,7 +9,7 @@ const initStruct = require('../properties/dirStructs/init/init')
 // check if an xps project exists, if it does return it's path, if not null
 async function projectExists(startDir = process.cwd()) {
     // search for the directory
-    let projExists = await hfs.lookup(path.resolve(startDir, '.xps/'))
+    let projExists = await hfs.lookup('.xps')
     if (!projExists) {
         return
     }
