@@ -59,11 +59,14 @@ async function directDependencies(entry, opts) {
                 if (!match.includes('.js'))
                     match += '.js'
 
-                // let hash = await
-                // console.log(match)
-                // console.log(hash)
+                let hash
+                if (opts.write)
+                    hash = await object.createHashedFile(match, opts.write)
+                else {
+                    hash = await object.hashContent(await (await fs.readFile(path.resolve(process.cwd(), match))).toString())
+                }
 
-                return {type: 'xps', dependency: match, hash: await object.createHashedFile(match, opts.write)}
+                return {type: 'xps', dependency: match, hash: hash}
             }
             let match = d.match(/('.*')|(".*")|(`.*`)/g)[0]
             match = match.substring(1, match.length - 1)
@@ -74,7 +77,7 @@ async function directDependencies(entry, opts) {
 }
 
 // returns a list of all the dependencies of a given entry and it's children
-async function listDependencies(entry, opts) {
+async function listDependencies(entry, opts = {}) {
     let children = [{type: 'xps', dependency: entry}]
     let listDepends = []
     let dependencies = []
