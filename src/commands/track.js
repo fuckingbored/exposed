@@ -4,7 +4,7 @@ const low = require('lowdb')
 const FileAsync = require('lowdb/adapters/FileAsync')
 const path = require('path')
 const hfs = require('../helpers/fs')
-const efs = require('fs-extra')
+const fs = require('fs-extra')
 const BypassError = require('../helpers/err').BypassError
 const {projectExists} = require('../middleware/project')
 const {trackerExists} = require('../middleware/tracker')
@@ -48,7 +48,7 @@ class TrackCommand extends Command {
             }).write()
 
             // creating entry file
-            let entryExists = efs.pathExists(path.resolve(process.cwd(), response.entry))
+            let entryExists = fs.pathExists(path.resolve(process.cwd(), response.entry))
             if (entryExists) {
                 // generate list of dependencies
                 let dependencies = await hfs.listDependencies(path.resolve(process.cwd(), response.entry), {
@@ -66,7 +66,7 @@ class TrackCommand extends Command {
         } catch (error) {
             if (!(error instanceof BypassError)) {
                 // attempt cleanup
-                await efs.remove(path.resolve(process.cwd(), './xps.json'))
+                await fs.remove(path.resolve(process.cwd(), './xps.json'))
             }
 
             this.log('Failed to init XPS module')
